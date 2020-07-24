@@ -24,6 +24,7 @@ const Dashboard: React.FC = () => {
   const [editingFood, setEditingFood] = useState<IFoodPlate>({} as IFoodPlate);
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [updatedEdit, setUpdatedEdit] = useState<number>();
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
@@ -41,6 +42,7 @@ const Dashboard: React.FC = () => {
   ): Promise<void> {
     try {
       // TODO ADD A NEW FOOD PLATE TO THE API
+
       const createFood = await api.post('/foods', {
         image: food.image,
         name: food.name,
@@ -59,6 +61,27 @@ const Dashboard: React.FC = () => {
     food: Omit<IFoodPlate, 'id' | 'available'>,
   ): Promise<void> {
     // TODO UPDATE A FOOD PLATE ON THE API
+
+    api
+      .put(`/foods/${updatedEdit}`, {
+        name: food.name,
+        image: food.image,
+        price: food.price,
+        description: food.description,
+      })
+      .then(response => {
+        const indexArray = foods.findIndex(f => f.id === updatedEdit);
+
+        foods[indexArray] = {
+          ...foods[indexArray],
+          name: food.name,
+          image: food.image,
+          price: food.price,
+          description: food.description,
+        };
+
+        setFoods([...foods]);
+      });
   }
 
   async function handleDeleteFood(id: number): Promise<void> {
@@ -77,36 +100,10 @@ const Dashboard: React.FC = () => {
 
   function handleEditFood(food: IFoodPlate): void {
     // TODO SET THE CURRENT EDITING FOOD ID IN THE STATE
-    console.log(`First Dash:`);
-    console.log(food);
     try {
-      if (food.available === false) {
-        api
-          .put(`/foods/${food.id}`, {
-            ...food,
-            available: true,
-          })
-          .then(response => {
-            console.log(`Second TRUE:`);
-            console.log(response.data);
-
-            console.log(foods);
-          });
-      } else {
-        api
-          .put(`/foods/${food.id}`, {
-            ...food,
-            available: false,
-          })
-          .then(response => {
-            console.log(`Second FALSE:`);
-            console.log(response.data);
-
-            console.log(foods);
-            // setFoods([...foods, response.data]);
-            // setEditingFood(response.data);
-          });
-      }
+      setUpdatedEdit(food.id);
+      setEditingFood(food);
+      toggleEditModal();
     } catch (err) {
       throw new Error('Aconteceu um erro no Edit!');
     }
