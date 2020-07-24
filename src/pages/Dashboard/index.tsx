@@ -28,6 +28,9 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     async function loadFoods(): Promise<void> {
       // TODO LOAD FOODS
+      await api.get<IFoodPlate[]>('/foods').then(response => {
+        setFoods(response.data);
+      });
     }
 
     loadFoods();
@@ -38,8 +41,17 @@ const Dashboard: React.FC = () => {
   ): Promise<void> {
     try {
       // TODO ADD A NEW FOOD PLATE TO THE API
+      const createFood = await api.post('/foods', {
+        image: food.image,
+        name: food.name,
+        price: food.price,
+        description: food.description,
+        available: true,
+      });
+
+      setFoods([...foods, createFood.data]);
     } catch (err) {
-      console.log(err);
+      throw new Error('Aconteceu um erro!');
     }
   }
 
@@ -51,6 +63,8 @@ const Dashboard: React.FC = () => {
 
   async function handleDeleteFood(id: number): Promise<void> {
     // TODO DELETE A FOOD PLATE FROM THE API
+    await api.delete(`/foods/${id}`);
+    setFoods(foods.filter(food => food.id !== id));
   }
 
   function toggleModal(): void {
@@ -63,6 +77,39 @@ const Dashboard: React.FC = () => {
 
   function handleEditFood(food: IFoodPlate): void {
     // TODO SET THE CURRENT EDITING FOOD ID IN THE STATE
+    console.log(`First Dash:`);
+    console.log(food);
+    try {
+      if (food.available === false) {
+        api
+          .put(`/foods/${food.id}`, {
+            ...food,
+            available: true,
+          })
+          .then(response => {
+            console.log(`Second TRUE:`);
+            console.log(response.data);
+
+            console.log(foods);
+          });
+      } else {
+        api
+          .put(`/foods/${food.id}`, {
+            ...food,
+            available: false,
+          })
+          .then(response => {
+            console.log(`Second FALSE:`);
+            console.log(response.data);
+
+            console.log(foods);
+            // setFoods([...foods, response.data]);
+            // setEditingFood(response.data);
+          });
+      }
+    } catch (err) {
+      throw new Error('Aconteceu um erro no Edit!');
+    }
   }
 
   return (

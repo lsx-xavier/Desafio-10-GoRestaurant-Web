@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { FiEdit3, FiTrash } from 'react-icons/fi';
 
 import { Container } from './styles';
+import api from '../../services/api';
 
 interface IFoodPlate {
   id: number;
@@ -28,6 +29,17 @@ const Food: React.FC<IProps> = ({
 
   async function toggleAvailable(): Promise<void> {
     // TODO UPDATE STATUS (available)
+    if (food.available === false) {
+      setIsAvailable(true);
+      console.log(`FOOD False to true:`);
+      console.log(food);
+      handleEditFood(food);
+    } else {
+      console.log(`FOOD True to false:`);
+      console.log(food);
+      setIsAvailable(false);
+      handleEditFood(food);
+    }
   }
 
   function setEditingFood(): void {
